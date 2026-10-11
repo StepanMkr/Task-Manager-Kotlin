@@ -1,0 +1,101 @@
+openapi: 3.0.3
+info:
+  title: Task Manager API
+  version: 1.0.0
+  description: API для управления задачами
+
+paths:
+  /tasks:
+    get:
+      summary: Получить все задачи
+      responses:
+        '200':
+          description: Список задач
+
+    post:
+      summary: Создать задачу
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+      responses:
+        '201':
+          description: Задача создана
+
+  /tasks/{id}:
+    get:
+      summary: Получить задачу по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор задачи
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Задача найдена
+        '400':
+          description: Некорректный ID
+        '404':
+          description: Задача не найдена
+    patch:
+      summary: Частично обновить задачу
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                completed:
+                  type: boolean
+
+      responses:
+        '200':
+          description: Задача успешно обновлена
+        '400':
+          description: Некорректные данные
+        '404':
+          description: Задача не найдена
+    delete:
+      summary: Удалить задачу по ID
+      description: Удаляет существующую задачу
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор задачи
+          schema:
+            type: integer
+            minimum: 1
+
+      responses:
+        '204':
+          description: Задача успешно удалена
+
+        '400':
+          description: Некорректный ID задачи
+
+        '404':
+          description: Задача не найдена
