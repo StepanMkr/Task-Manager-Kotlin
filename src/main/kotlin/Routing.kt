@@ -2,25 +2,28 @@ package com.example
 
 import com.example.dto.CreateTaskRequest
 import com.example.dto.UpdateTaskRequest
-import com.example.model.Task
+import com.example.repository.InMemoryTaskRepository
+import com.example.repository.TaskRepository
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.plugins.swagger.*
 
-import com.example.repository.TaskRepository
+import com.example.service.TaskService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
-import java.awt.Taskbar
 
 fun Application.configureRouting() {
+    val repository = InMemoryTaskRepository()
+    val service = TaskService(repository)
+
     routing {
         swaggerUI(
             path = "swagger",
             swaggerFile = "openapi.yaml"
         )
         get("/tasks") {
-            val tasks = TaskRepository.getAll()
+            val tasks = service.getAll()
             call.respond(tasks)
         }
         get("/tasks/{id}") {
@@ -32,7 +35,7 @@ fun Application.configureRouting() {
                 return@get
             }
 
-            val taskById = TaskRepository.getById(id)
+            val taskById = service.getById(id)
 
             if (taskById == null) {
                 call.respond(HttpStatusCode.NotFound, "Задача не найдена")
@@ -50,7 +53,7 @@ fun Application.configureRouting() {
                 return@post
             }
 
-            val task = TaskRepository.create(request.title)
+            val task = service.create(request.title)
 
             call.respond(HttpStatusCode.Created, task)
         }
@@ -73,7 +76,7 @@ fun Application.configureRouting() {
                 return@patch
             }
 
-            val updatedTask = TaskRepository.update(
+            val updatedTask = service.update(
                 id,
                 title = request.title,
                 completed = request.completed
@@ -98,7 +101,7 @@ fun Application.configureRouting() {
                 return@delete
             }
 
-            val deletedTask = TaskRepository.delete(id)
+            val deletedTask = service.delete(id)
 
             if (!deletedTask) {
                 call.respond(
